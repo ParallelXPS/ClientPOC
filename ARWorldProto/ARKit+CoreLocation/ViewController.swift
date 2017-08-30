@@ -9,7 +9,6 @@
 import UIKit
 import SceneKit 
 import MapKit
-import CocoaLumberjack
 
 class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDelegate {
     let sceneLocationView = SceneLocationView()
@@ -19,6 +18,7 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
     var locationEstimateAnnotation: MKPointAnnotation?
     var username: String?
     var arworld: ARWorldSession?
+    var refreshTimer = Stopwatch()
     
     var updateUserLocationTimer: Timer?
     
@@ -36,6 +36,7 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
     var infoLabel = UILabel()
     var titleLabel = UILabel()
     var addButton = UIButton()
+    
     
     var updateInfoLabelTimer: Timer?
     
@@ -92,12 +93,12 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         
         //Currently set to Canary Wharf
         // 117.606163
-        let pinCoordinate = CLLocationCoordinate2D(latitude: 33.455489, longitude: -117.606163)
-        let pinLocation = CLLocation(coordinate: pinCoordinate, altitude: 236)
-        let pinImage = UIImage(named: "pin")!
-        let pinLocationNode = LocationAnnotationNode(location: pinLocation, image: pinImage)
-        sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: pinLocationNode)
-        
+//        let pinCoordinate = CLLocationCoordinate2D(latitude: 33.455489, longitude: -117.606163)
+//        let pinLocation = CLLocation(coordinate: pinCoordinate, altitude: 236)
+//        let pinImage = UIImage(named: "pin")!
+//        let pinLocationNode = LocationAnnotationNode(location: pinLocation, image: pinImage)
+//        sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: pinLocationNode)
+//
         
 //        sceneLocationView.addLocationNodeForCurrentPosition(locationNode: <#T##LocationNode#>)
         
@@ -120,21 +121,52 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
     }
     
     @objc func addClicked() {
-        self.addShip()
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        alert.addAction(UIAlertAction(title: "Space Ship", style: .default) { _ in
+           self.addShip()
+        })
+        
+        alert.addAction(UIAlertAction(title: "Cup", style: .default) { _ in
+            self.addCup()
+        })
+        
+        alert.addAction(UIAlertAction(title: "Chair", style: .default) { _ in
+            self.addChair()
+        })
+        
+        alert.addAction(UIAlertAction(title: "Pin", style: .default) { _ in
+            self.addPin()
+        })
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default) { _ in
+
+        })
+        
+        self.present(alert, animated: true)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        DDLogDebug("run")
+//        DDLogDebug("run")
         sceneLocationView.run()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        DDLogDebug("pause")
+//        DDLogDebug("pause")
         // Pause the view's session
         sceneLocationView.pause()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if (self.username == nil) {
+            self.showInputDialog()
+        } else {
+            self.fetchARWorld()
+        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -165,12 +197,6 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
             width: self.view.frame.size.width,
             height: self.view.frame.size.height / 2)
         
-        if (self.username == nil) {
-            self.showInputDialog()
-        } else {
-            self.fetchARWorld()
-        }
-        
     }
     
     override func didReceiveMemoryWarning() {
@@ -182,18 +208,20 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         if let currentLocation = sceneLocationView.currentLocation() {
             DispatchQueue.main.async {
                 
+                self.refreshARWorld(currentLocation)
+                
                 if let bestEstimate = self.sceneLocationView.bestLocationEstimate(),
                     let position = self.sceneLocationView.currentScenePosition() {
-                    DDLogDebug("")
-                    DDLogDebug("Fetch current location")
-                    DDLogDebug("best location estimate, position: \(bestEstimate.position), location: \(bestEstimate.location.coordinate), accuracy: \(bestEstimate.location.horizontalAccuracy), date: \(bestEstimate.location.timestamp)")
-                    DDLogDebug("current position: \(position)")
+//                    DDLogDebug("")
+//                    DDLogDebug("Fetch current location")
+//                    DDLogDebug("best location estimate, position: \(bestEstimate.position), location: \(bestEstimate.location.coordinate), accuracy: \(bestEstimate.location.horizontalAccuracy), date: \(bestEstimate.location.timestamp)")
+//                    DDLogDebug("current position: \(position)")
                     
-                    let translation = bestEstimate.translatedLocation(to: position)
+                    _ = bestEstimate.translatedLocation(to: position)
                     
-                    DDLogDebug("translation: \(translation)")
-                    DDLogDebug("translated location: \(currentLocation)")
-                    DDLogDebug("")
+//                    DDLogDebug("translation: \(translation)")
+//                    DDLogDebug("translated location: \(currentLocation)")
+//                    DDLogDebug("")
                 }
                 
                 if self.userAnnotation == nil {
@@ -257,6 +285,13 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         }
     }
     
+    func addPin() {
+        let image = UIImage(named: "pin")!
+        let annotationNode = LocationAnnotationNode(location: nil, image: image)
+        annotationNode.scaleRelativeToDistance = true
+        sceneLocationView.addLocationNodeForCurrentPosition(locationNode: annotationNode)
+    }
+    
     func addShip() {
         let scene = SCNScene(named: "ship.scn", inDirectory:"Models.scnassets/spaceship")!
         let rootNode = LocationNode(location: nil)
@@ -265,7 +300,29 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         //rootNode.scaleRelativeToDistance = true
         rootNode.addChildNode(node)
         sceneLocationView.addLocationNodeInFront(locationNode: rootNode)
-        DDLogDebug("add ship")
+//        DDLogDebug("add ship")
+    }
+    
+    func addCup() {
+        let scene = SCNScene(named: "cup.scn", inDirectory:"Models.scnassets/cup")!
+        let rootNode = LocationNode(location: nil)
+        let node = scene.rootNode.childNode(withName: "cup", recursively: true)!
+        
+        //rootNode.scaleRelativeToDistance = true
+        rootNode.addChildNode(node)
+        sceneLocationView.addLocationNodeInFront(locationNode: rootNode)
+        //        DDLogDebug("add ship")
+    }
+    
+    func addChair() {
+        let scene = SCNScene(named: "chair.scn", inDirectory:"Models.scnassets/chair")!
+        let rootNode = LocationNode(location: nil)
+        let node = scene.rootNode.childNode(withName: "chair", recursively: true)!
+        
+        //rootNode.scaleRelativeToDistance = true
+        rootNode.addChildNode(node)
+        sceneLocationView.addLocationNodeInFront(locationNode: rootNode)
+        //        DDLogDebug("add ship")
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -326,11 +383,11 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
     //MARK: SceneLocationViewDelegate
     
     func sceneLocationViewDidAddSceneLocationEstimate(sceneLocationView: SceneLocationView, position: SCNVector3, location: CLLocation) {
-        DDLogDebug("add scene location estimate, position: \(position), location: \(location.coordinate), accuracy: \(location.horizontalAccuracy), date: \(location.timestamp)")
+//        DDLogDebug("add scene location estimate, position: \(position), location: \(location.coordinate), accuracy: \(location.horizontalAccuracy), date: \(location.timestamp)")
     }
     
     func sceneLocationViewDidRemoveSceneLocationEstimate(sceneLocationView: SceneLocationView, position: SCNVector3, location: CLLocation) {
-        DDLogDebug("remove scene location estimate, position: \(position), location: \(location.coordinate), accuracy: \(location.horizontalAccuracy), date: \(location.timestamp)")
+//        DDLogDebug("remove scene location estimate, position: \(position), location: \(location.coordinate), accuracy: \(location.horizontalAccuracy), date: \(location.timestamp)")
     }
     
     func sceneLocationViewDidConfirmLocationOfNode(sceneLocationView: SceneLocationView, node: LocationNode) {
@@ -344,15 +401,33 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         
     }
     
+    func refreshARWorld(_ location: CLLocation) {
+        var do_refresh = false
+        
+        if self.refreshTimer.is_running == false {
+            do_refresh = true
+        } else {
+            if self.refreshTimer.durationSeconds() > 5.0 {
+                do_refresh = true
+                self.refreshTimer.reset()
+            }
+        }
+        
+        if (do_refresh) {
+            arworld?.fetchObjects(lat: location.coordinate.latitude, lng: location.coordinate.longitude, alt:location.altitude) { status, response in
+                
+            }
+        }
+
+    }
+    
     func fetchARWorld() {
         self.titleLabel.text = self.username
-//        if self.arworld == nil {
-//            self.arworld = ARWorldSession(username: self.username!)
-//        }
-//        
-//        arworld?.fetchObjects() { status, response in
-//            
-//        }
+        if self.arworld == nil {
+            self.arworld = ARWorldSession(username: self.username!)
+        }
+        
+
     }
     
     func showInputDialog() {
@@ -413,3 +488,4 @@ extension UIView {
         return recursiveSubviews
     }
 }
+

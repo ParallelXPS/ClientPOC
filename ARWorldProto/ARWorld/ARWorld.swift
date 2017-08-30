@@ -8,7 +8,7 @@
 
 import Foundation
 
-let AR_WORLD_URL = "http://itf.io"
+let AR_WORLD_URL = "https://itf.io"
 
 class ARWorldSession {
     var username: String
@@ -22,18 +22,31 @@ class ARWorldSession {
         
     }
     
-    func fetchObjects(completion: @escaping ((_ status:Bool, _ response: Dictionary<String, Any>) -> Void)) {
-        
+    func fetchObjects(lat: Double, lng: Double, alt: Double, completion: @escaping ((_ status:Bool, _ response: Dictionary<String, Any>) -> Void)) {
+        print("fetchObjects")
+        print(self.token ?? "no token")
         if self.token == nil {
             self.refreshToken() { status in
                 if self.token != nil {
-                    self.fetchObjects(completion: completion)
+                    self.fetchObjects(lat: lat, lng: lng, alt: alt, completion: completion)
                 }
             }
             return
         }
         
-        self.getRequest(path: "rpc/arworld/object", params: ["size":1000]) { status, response in
+        let slat:String = String(format:"%.6f", lat)
+        let slng:String = String(format:"%.6f", lng)
+        let salt:String = String(format:"%.6f", alt)
+        
+        let params = [
+            "token": self.token!,
+            "size": "1000",
+            "lat": slat,
+            "lng": slng,
+            "alt": salt
+        ]
+        
+        self.getRequest(path: "rpc/arworld/object", params: params) { status, response in
             if (status == true) {
                 if let jsonResult = response["data"] as? Dictionary<String, Any> {
                     // do whatever with jsonResult
@@ -47,7 +60,7 @@ class ARWorldSession {
     }
     
     func refreshToken(completion: @escaping ((_ status: Bool) -> Void)) {
-        let requestData = ["username": self.username]
+        let requestData = ["username": self.username, "group":1] as [String : Any]
         do {
             try self.postRequest(path: "rpc/arworld/auth", data: requestData) { status, response in
                 if (status == true) {
@@ -90,7 +103,7 @@ class ARWorldSession {
                     postResponse["status"] = false
                     postResponse["error"] = responseJSON["error"]
                 }
-                completion(true, postResponse as! Dictionary<String, Int>)
+                completion(true, postResponse)
             }
         }
         
@@ -122,13 +135,13 @@ class ARWorldSession {
             }
             let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
             if let responseJSON = responseJSON as? [String: Any] {
-                if responseJSON["data"] != nil {
-                    postResponse["data"] = responseJSON["data"]
-                } else if responseJSON["error"] != nil {
+                if let responseDATA = responseJSON["data"] as? [String: Any] {
+                    postResponse["data"]  = responseDATA
+                } else if let responseErr = responseJSON["error"] as? String {
                     postResponse["status"] = false
-                    postResponse["error"] = responseJSON["error"]
+                    postResponse["error"] = responseErr
                 }
-                completion(true, postResponse as! Dictionary<String, Int>)
+                completion(true, postResponse)
             }
         }
         

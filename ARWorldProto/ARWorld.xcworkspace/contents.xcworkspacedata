@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:/Users/ians/Downloads/ARKit-CoreLocation-feature-xcode-9b5/ARWorld.xcodeproj">
+      location = "group:ARWorld.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">

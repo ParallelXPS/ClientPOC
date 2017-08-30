@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		359210831F57753B006FC0FA /* util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359210821F57753B006FC0FA /* util.swift */; };
 		35B728B51F55C77F00956613 /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 35B728B41F55C1E200956613 /* Models.scnassets */; };
 		35B728B81F55ECB400956613 /* ARWorld.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B728B71F55ECB400956613 /* ARWorld.swift */; };
 		4901EF051F1B7D560067870D /* SceneLocationEstimate+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4901EF041F1B7D560067870D /* SceneLocationEstimate+Extensions.swift */; };
@@ -27,6 +28,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		359210821F57753B006FC0FA /* util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = util.swift; sourceTree = "<group>"; };
 		35B728B41F55C1E200956613 /* Models.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = Models.scnassets; sourceTree = "<group>"; };
 		35B728B71F55ECB400956613 /* ARWorld.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARWorld.swift; sourceTree = "<group>"; };
 		38104A8494954E9B79241EAE /* Pods-ARKit+CoreLocation.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARKit+CoreLocation.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARKit+CoreLocation/Pods-ARKit+CoreLocation.debug.xcconfig"; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 			isa = PBXGroup;
 			children = (
 				35B728B71F55ECB400956613 /* ARWorld.swift */,
+				359210821F57753B006FC0FA /* util.swift */,
 			);
 			path = ARWorld;
 			sourceTree = "<group>";
@@ -266,6 +269,7 @@
 				49A3FBFF1F09B1D200AA59C8 /* LocationNode.swift in Sources */,
 				49A3FBFD1F09B00400AA59C8 /* CLLocation+Extensions.swift in Sources */,
 				49A3FC051F0A423800AA59C8 /* CGPoint+Extensions.swift in Sources */,
+				359210831F57753B006FC0FA /* util.swift in Sources */,
 				49A3FBE01F09988100AA59C8 /* ViewController.swift in Sources */,
 				4901EF051F1B7D560067870D /* SceneLocationEstimate+Extensions.swift in Sources */,
 				49A3FC011F09B9CF00AA59C8 /* SceneLocationEstimate.swift in Sources */,
