@@ -346,13 +346,13 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
     
     func fetchARWorld() {
         self.titleLabel.text = self.username
-        if self.arworld == nil {
-            self.arworld = ARWorldSession(username: self.username!)
-        }
-        
-        arworld?.fetchObjects() { status, response in
-            
-        }
+//        if self.arworld == nil {
+//            self.arworld = ARWorldSession(username: self.username!)
+//        }
+//        
+//        arworld?.fetchObjects() { status, response in
+//            
+//        }
     }
     
     func showInputDialog() {
