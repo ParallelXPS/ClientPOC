@@ -18,11 +18,23 @@ class ARWorldSession {
         self.username = username
     }
     
-    func addObject(data: Dictionary<String, Any>) {
-        
+    func addObject(data: Dictionary<String, Any>, completion: @escaping ((_ status:Bool, _ response: Dictionary<String, Any>) -> Void)) {
+        do {
+            try self.postRequest(path: "rpc/arworld/object", data: data) { status, response in
+                if (status == true) {
+                    if let jsonResult = response["data"] as? Dictionary<String, Any> {
+                        completion(true, jsonResult)
+                        return
+                    }
+                }
+                completion(false, [:])
+            }
+        } catch {
+            print(error)
+        }
     }
     
-    func fetchObjects(lat: Double, lng: Double, alt: Double, completion: @escaping ((_ status:Bool, _ response: Dictionary<String, Any>) -> Void)) {
+    func fetchObjects(lat: Double, lng: Double, alt: Double, completion: @escaping ((_ status:Bool, _ response: Array<Any>) -> Void)) {
         print("fetchObjects")
         print(self.token ?? "no token")
         if self.token == nil {
@@ -34,9 +46,9 @@ class ARWorldSession {
             return
         }
         
-        let slat:String = String(format:"%.6f", lat)
-        let slng:String = String(format:"%.6f", lng)
-        let salt:String = String(format:"%.6f", alt)
+        let slat:String = String(format:"%.10f", lat)
+        let slng:String = String(format:"%.10f", lng)
+        let salt:String = String(format:"%.10f", alt)
         
         let params = [
             "token": self.token!,
@@ -46,16 +58,15 @@ class ARWorldSession {
             "alt": salt
         ]
         
-        self.getRequest(path: "rpc/arworld/object", params: params) { status, response in
+        self.getRequest(path: "rpc/arworld/observation", params: params) { status, response in
             if (status == true) {
-                if let jsonResult = response["data"] as? Dictionary<String, Any> {
+                if let jsonResult = response["data"] as? Array<Any> {
                     // do whatever with jsonResult
-                    self.token = jsonResult["token"] as? String
-                    completion(true, response)
+                    completion(true, jsonResult)
                     return
                 }
             }
-            completion(false, response)
+            completion(false, [Any]())
         }
     }
     

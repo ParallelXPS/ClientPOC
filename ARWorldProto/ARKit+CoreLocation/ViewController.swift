@@ -24,7 +24,7 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
     
     ///Whether to show a map view
     ///The initial value is respected
-    var showMapView: Bool = false
+    var showMapView: Bool = true
     
     var centerMapOnUserLocation: Bool = true
     
@@ -37,6 +37,7 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
     var titleLabel = UILabel()
     var addButton = UIButton()
     
+    var arworldObjects = [Int:LocationNode]()
     
     var updateInfoLabelTimer: Timer?
     
@@ -264,6 +265,9 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
     }
     
     @objc func updateInfoLabel() {
+        let loc = sceneLocationView.currentLocation()
+        self.refreshARWorld(loc!)
+        
         if let position = sceneLocationView.currentScenePosition() {
             infoLabel.text = "x: \(String(format: "%.2f", position.x)), y: \(String(format: "%.2f", position.y)), z: \(String(format: "%.2f", position.z))\n"
         }
@@ -280,8 +284,28 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         let date = Date()
         let comp = Calendar.current.dateComponents([.hour, .minute, .second, .nanosecond], from: date)
         
+        let count = arworldObjects.count
         if let hour = comp.hour, let minute = comp.minute, let second = comp.second, let nanosecond = comp.nanosecond {
             infoLabel.text!.append("\(String(format: "%02d", hour)):\(String(format: "%02d", minute)):\(String(format: "%02d", second)):\(String(format: "%03d", nanosecond / 1000000))")
+        }
+        
+        infoLabel.text!.append("  ar objects: \(count)")
+        let accuracy = loc?.horizontalAccuracy
+        infoLabel.text!.append("  accuracy: \(String(format: "%.2f", accuracy!))")
+    }
+    
+    //MARK: Add ARs
+    
+    func saveToCloud(_ model: String, _ node: LocationNode, _ kind: Int) {
+        // now save object to ARWorld
+        self.arworld?.addObject(data: [
+            "model": model,
+            "kind": kind,
+            "alt":node.location.altitude,
+            "lat":node.location.coordinate.latitude,
+            "lng":node.location.coordinate.longitude
+        ]) { status, response in
+            
         }
     }
     
@@ -290,6 +314,8 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         let annotationNode = LocationAnnotationNode(location: nil, image: image)
         annotationNode.scaleRelativeToDistance = true
         sceneLocationView.addLocationNodeForCurrentPosition(locationNode: annotationNode)
+        
+        self.saveToCloud("pin", annotationNode, 5)
     }
     
     func addShip() {
@@ -300,7 +326,9 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         //rootNode.scaleRelativeToDistance = true
         rootNode.addChildNode(node)
         sceneLocationView.addLocationNodeInFront(locationNode: rootNode)
-//        DDLogDebug("add ship")
+        
+        self.saveToCloud("spaceship", rootNode, 0)
+
     }
     
     func addCup() {
@@ -311,7 +339,7 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         //rootNode.scaleRelativeToDistance = true
         rootNode.addChildNode(node)
         sceneLocationView.addLocationNodeInFront(locationNode: rootNode)
-        //        DDLogDebug("add ship")
+        self.saveToCloud("cup", rootNode, 0)
     }
     
     func addChair() {
@@ -322,7 +350,7 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         //rootNode.scaleRelativeToDistance = true
         rootNode.addChildNode(node)
         sceneLocationView.addLocationNodeInFront(locationNode: rootNode)
-        //        DDLogDebug("add ship")
+        self.saveToCloud("chair", rootNode, 0)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -406,8 +434,9 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         
         if self.refreshTimer.is_running == false {
             do_refresh = true
+            self.refreshTimer.start()
         } else {
-            if self.refreshTimer.durationSeconds() > 5.0 {
+            if self.refreshTimer.durationSeconds() > 30.0 {
                 do_refresh = true
                 self.refreshTimer.reset()
             }
@@ -415,10 +444,102 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         
         if (do_refresh) {
             arworld?.fetchObjects(lat: location.coordinate.latitude, lng: location.coordinate.longitude, alt:location.altitude) { status, response in
-                
+                DispatchQueue.main.async {
+                    for case let item as Dictionary<String, Any> in response {
+                        if let mid = item["id"] as? Int {
+                            if self.arworldObjects[mid] == nil {
+                                let kind = item["kind"] as? Int
+                                if (kind == 0) {
+                                    self.addARWorldModel(item)
+                                } else {
+                                    self.addARWorldPin(item)
+                                }
+                                
+                            }
+                        }
+                    }
+                }
             }
         }
 
+    }
+    
+    func addARWorldPin(_ model: Dictionary<String, Any>) {
+        let mid = model["id"] as? Int
+        let model_name = model["model"] as? String
+        let lat = model["lat"] as? Double
+        let lng = model["lng"] as? Double
+        let alt = model["alt"] as? Double
+        
+        let coordinate = CLLocationCoordinate2D(
+            latitude: lat!,
+            longitude: lng!)
+        
+        //        let location = sceneLocationView.currentLocation()
+        let location = CLLocation(coordinate: coordinate, altitude: alt!)
+        
+        let image = UIImage(named: model_name!)!
+        let annotationNode = LocationAnnotationNode(location: location, image: image)
+        annotationNode.scaleRelativeToDistance = true
+        sceneLocationView.addLocationNodeForCurrentPosition(locationNode: annotationNode)
+        
+        self.arworldObjects[mid!] = annotationNode
+    }
+    
+    func addARWorldModel(_ model: Dictionary<String, Any>) {
+        let mid = model["id"] as? Int
+        let model_name = model["model"] as? String
+        let lat = model["lat"] as? Double
+        let lng = model["lng"] as? Double
+        let alt = model["alt"] as? Double
+        var fname = "ship.scn"
+        var path = "Models.scnassets/spaceship"
+        var name = "ship"
+        
+        switch(model_name) {
+        case "spaceship"?:
+            name = "ship"
+            break
+        case "lamp"?:
+            name = "lamp"
+            fname = "\(name).scn"
+            path = "Models.scnassets/\(name)"
+            break
+        case "cup"?:
+            name = "cup"
+            fname = "\(name).scn"
+            path = "Models.scnassets/\(name)"
+            break
+        case "chair"?:
+            name = "chair"
+            fname = "\(name).scn"
+            path = "Models.scnassets/\(name)"
+            break
+        case .none:
+            
+            break
+        case .some(_):
+            
+            break
+        }
+        
+        let coordinate = CLLocationCoordinate2D(
+            latitude: lat!,
+            longitude: lng!)
+        
+//        let location = sceneLocationView.currentLocation()
+        let location = CLLocation(coordinate: coordinate, altitude: alt!)
+        let scene = SCNScene(named: fname, inDirectory:path)!
+        let rootNode = LocationNode(location: location)
+        let node = scene.rootNode.childNode(withName: name, recursively: true)!
+        self.arworldObjects[mid!] = rootNode
+        rootNode.addChildNode(node)
+        sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: rootNode)
+        
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = coordinate
+        rootNode.annotation  = annotation
+        self.mapView.addAnnotation(annotation)
     }
     
     func fetchARWorld() {

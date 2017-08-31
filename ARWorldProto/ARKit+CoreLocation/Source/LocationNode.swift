@@ -17,6 +17,8 @@ open class LocationNode: SCNNode {
     ///Location can be changed and confirmed later by SceneLocationView.
     public var location: CLLocation!
     
+    public var annotation: Any!
+    
     ///Whether the location of the node has been confirmed.
     ///This is automatically set to true when you create a node using a location.
     ///Otherwise, this is false, and becomes true once the user moves 100m away from the node,

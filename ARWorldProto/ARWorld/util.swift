@@ -29,6 +29,7 @@ public class Stopwatch {
     }
     
     public func durationSeconds() -> TimeInterval {
+        end_ = Date().timeIntervalSince1970
         return end_ - start_;
     }
 }
