@@ -83,7 +83,6 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         //Set to true to display an arrow which points north.
         //Checkout the comments in the property description and on the readme on this.
 //        sceneLocationView.orientToTrueNorth = false
-        
 //        sceneLocationView.locationEstimateMethod = .coreLocationDataOnly
         sceneLocationView.showAxesNode = false
         sceneLocationView.locationDelegate = self
@@ -279,6 +278,11 @@ class ViewController: UIViewController, MKMapViewDelegate, SceneLocationViewDele
         if let heading = sceneLocationView.locationManager.heading,
             let accuracy = sceneLocationView.locationManager.headingAccuracy {
             infoLabel.text!.append("Heading: \(heading)º, accuracy: \(Int(round(accuracy)))º\n")
+            
+            if (showMapView) {
+                mapView.camera.heading = heading
+                mapView.setCamera(mapView.camera, animated: true)
+            }
         }
         
         let date = Date()

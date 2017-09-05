@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		354631931F5B405500F90690 /* Beacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354631921F5B405500F90690 /* Beacon.swift */; };
 		359210831F57753B006FC0FA /* util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359210821F57753B006FC0FA /* util.swift */; };
 		35B728B51F55C77F00956613 /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 35B728B41F55C1E200956613 /* Models.scnassets */; };
 		35B728B81F55ECB400956613 /* ARWorld.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B728B71F55ECB400956613 /* ARWorld.swift */; };
@@ -28,6 +29,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		354631921F5B405500F90690 /* Beacon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beacon.swift; sourceTree = "<group>"; };
 		359210821F57753B006FC0FA /* util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = util.swift; sourceTree = "<group>"; };
 		35B728B41F55C1E200956613 /* Models.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = Models.scnassets; sourceTree = "<group>"; };
 		35B728B71F55ECB400956613 /* ARWorld.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARWorld.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				49A3FC021F09BADB00AA59C8 /* FloatingPoint+Radians.swift */,
 				49A3FC041F0A423800AA59C8 /* CGPoint+Extensions.swift */,
 				49D206F21F124BDD00D7D622 /* SCNNode+Extensions.swift */,
+				354631921F5B405500F90690 /* Beacon.swift */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -171,7 +174,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0900;
 				LastUpgradeCheck = 0900;
-				ORGANIZATIONNAME = "Project Dent";
+				ORGANIZATIONNAME = 311Labs;
 				TargetAttributes = {
 					49A3FBD71F09988100AA59C8 = {
 						CreatedOnToolsVersion = 9.0;
@@ -264,6 +267,7 @@
 			files = (
 				35B728B81F55ECB400956613 /* ARWorld.swift in Sources */,
 				49099E391F24BAE5007B76FD /* SCNVector3+Extensions.swift in Sources */,
+				354631931F5B405500F90690 /* Beacon.swift in Sources */,
 				49A3FBF71F099C8100AA59C8 /* SceneLocationView.swift in Sources */,
 				49A3FC031F09BADB00AA59C8 /* FloatingPoint+Radians.swift in Sources */,
 				49A3FBFF1F09B1D200AA59C8 /* LocationNode.swift in Sources */,

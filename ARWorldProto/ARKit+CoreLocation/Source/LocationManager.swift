@@ -30,7 +30,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         super.init()
         
         self.locationManager = CLLocationManager()
-        self.locationManager!.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+//        self.locationManager!.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        self.locationManager!.desiredAccuracy = kCLLocationAccuracyBest
         self.locationManager!.distanceFilter = kCLDistanceFilterNone
         self.locationManager!.headingFilter = kCLHeadingFilterNone
         self.locationManager!.pausesLocationUpdatesAutomatically = false
@@ -60,6 +61,29 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     //MARK: - CLLocationManagerDelegate
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .authorizedAlways {
+            if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
+                if CLLocationManager.isRangingAvailable() {
+                    startBeaconScanning()
+                }
+            }
+        }
+        
+        if status == .authorizedWhenInUse {
+            if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
+                if CLLocationManager.isRangingAvailable() {
+                    startBeaconScanning()
+                }
+            }
+        }
+    }
+    
+    // reference of UUIDs: https://github.com/seboslaw/iBeacon-UUID-Repository
+    func startBeaconScanning() {
+        
+    }
+    
+    func stopBeaconScanning() {
         
     }
     
@@ -85,6 +109,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     
     func locationManagerShouldDisplayHeadingCalibration(_ manager: CLLocationManager) -> Bool {
         return true
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
+        
+        
     }
 }
 
